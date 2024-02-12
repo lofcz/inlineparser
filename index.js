@@ -110,7 +110,7 @@ class InlineParser {
 
         if (t.isAssignmentExpression(startNode)) {
           var col = column;
-          finalStartNode = startNode.right.start <= col && startNode.right.end >= col ? startNode.right : startNode.left;
+          finalStartNode = startNode.right.loc.start.column <= col && startNode.right.loc.end.column >= col ? startNode.right : startNode.left;
           identifiers.push({
             type: NodeTypes.Identifier,
             value: finalStartNode.name
