@@ -2,7 +2,13 @@ const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 const t = require("@babel/types");
 
-export class InlineParser {
+const NodeTypes = {
+	Unknown: 0,
+	Identifier: 1,
+	Literal: 2,
+}
+
+class InlineParser {
   ast = {};
   lastCode = "";
 
@@ -29,51 +35,96 @@ export class InlineParser {
           }
         },
     });
+
+    function getFullIdentifierPathSimple(node) {
+      let identifiers = [];
+      let nodeIndex = nodes.indexOf(node);
+    
+      function processNode(cNode) {
+        if (t.isIdentifier(cNode)) {
+          identifiers.push({
+            type: NodeTypes.Identifier,
+            value: cNode.name
+          });
+        }
+        else if (t.isLiteral(cNode)) {
+            identifiers.push({
+              type: NodeTypes.Literal,
+              value: cNode.value
+            });
+        }
+        else {
+          return false;
+        }
+
+        return true;
+      }
+
+      processNode(node);
+
+      if (nodeIndex > 1) {
+          for (var i = nodeIndex - 1; i > 0; i--) {
+              var cNode = nodes[i];
+  
+              if (!processNode(cNode)) {
+                break;
+              }
+          }
+      }
+
+      return identifiers.reverse();
+    }
       
-    function getFullIdentifierPath(node) {
+    function getFullIdentifierPathStrategySwitch(node) {
         let identifiers = [];
         let nodeIndex = nodes.indexOf(node);
+        let startNode = null;
     
         function processNode(cNode) {
-          if (t.isIdentifier(cNode)) {
-            identifiers.push({
-              type: "identifier",
-              value: cNode.name
-            });
-          }
-          else if (t.isLiteral(cNode)) {
-              identifiers.push({
-                type: "literal",
-                value: cNode.value
-              });
+          if (t.isIdentifier(cNode) || t.isLiteral(cNode)) {
+              return false;
           }
           else {
-            return false;
+            startNode = cNode;
+            return true;
           }
-    
-          return true;
         }
-    
-        processNode(node);
     
         if (nodeIndex > 1) {
             for (var i = nodeIndex - 1; i > 0; i--) {
                 var cNode = nodes[i];
     
-                if (!processNode(cNode)) {
+                if (processNode(cNode)) {
                   break;
                 }
             }
         }
-    
+
+        let finalStartNode = null;
+
+        if (t.isAssignmentExpression(startNode)) {
+          finalStartNode = startNode.right;
+          identifiers.push({
+            type: NodeTypes.Identifier,
+            value: finalStartNode.name
+          });
+        }
+        else if (t.isMemberExpression(startNode) || t.isOptionalMemberExpression(startNode)) {
+            return getFullIdentifierPathSimple(node);
+        }
+
         return identifiers.reverse();
     }
     
     if (nodeAtCursor) {
-        let identifiers = getFullIdentifierPath(nodeAtCursor);
+        let identifiers = getFullIdentifierPathStrategySwitch(nodeAtCursor);
         return identifiers;
     }
 
     return [];
   }
 }
+
+module.exports = {
+  InlineParser,
+};

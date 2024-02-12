@@ -1,7 +1,6 @@
 const x = require("./index");
 
-export default function () {
-    let parser = new x.InlineParser();
-    let chain = parser.getHoverIdentifierChain("let x = a.b.c", 1, 13);
-    console.log(JSON.stringify(chain));
-}
+
+let parser = new x.InlineParser();
+let chain = parser.getHoverIdentifierChain("x += a", 1, 6);
+console.log(JSON.stringify(chain));
