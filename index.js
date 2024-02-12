@@ -14,9 +14,15 @@ class InlineParser {
 
   getHoverIdentifierChain(code, line, column) {
 
+
     if (code !== this.lastCode) {
+       try {
         this.ast = parser.parse(code);
         this.code = code;
+       }
+       catch (e) {
+        this.code = code;
+       }
     }
 
     let nodeAtCursor = undefined;
@@ -103,7 +109,8 @@ class InlineParser {
         let finalStartNode = null;
 
         if (t.isAssignmentExpression(startNode)) {
-          finalStartNode = startNode.right;
+          var col = column;
+          finalStartNode = startNode.right.start <= col && startNode.right.end >= col ? startNode.right : startNode.left;
           identifiers.push({
             type: NodeTypes.Identifier,
             value: finalStartNode.name

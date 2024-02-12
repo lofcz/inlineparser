@@ -12,7 +12,23 @@ function parse(args) {
 describe('parse()', function () {
   const tests = [
     {args: ["x += a", 1, 6], expected: [{ type: 1, value: "a" }]},
-    {args: ["x += a.b", 1, 8], expected: [{ type: 1, value: "a" }, { type: 1, value: "b" }]}
+    {args: ["x += a.b", 1, 8], expected: [{ type: 1, value: "a" }, { type: 1, value: "b" }]},
+    {args: [
+`
+async function main() {
+var z = 0;
+
+for (var i = 0; i < 10; i++) {
+      z += i;
+      console.log(z);
+}
+}
+`, 6, 7
+    ],
+    expected: [
+      { type: 1, value: "z" }
+    ]
+   }
   ];
 
   tests.forEach(({args, expected}) => {
