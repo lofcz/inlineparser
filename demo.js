@@ -11,5 +11,5 @@ for (var i = 0; i < 10; i++) {
       console.log(z);
 }
 }
-`, 6, 12);
+`, 3, 5);
 console.log(JSON.stringify(chain));

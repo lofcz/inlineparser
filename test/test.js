@@ -44,7 +44,23 @@ for (var i = 0; i < 10; i++) {
         expected: [
           { type: 1, value: "i" }
         ]
-       }
+    },
+  {args: [
+  `
+async function main() {
+var z = 0;
+
+for (var i = 0; i < 10; i++) {
+      z += i;
+      console.log(z);
+}
+}
+`, 3, 5
+          ],
+          expected: [
+            { type: 1, value: "z" }
+          ]
+      }
   ];
 
   tests.forEach(({args, expected}) => {

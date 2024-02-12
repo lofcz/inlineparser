@@ -116,7 +116,7 @@ class InlineParser {
             value: finalStartNode.name
           });
         }
-        else if (t.isMemberExpression(startNode) || t.isOptionalMemberExpression(startNode)) {
+        else {
             return getFullIdentifierPathSimple(node);
         }
 
